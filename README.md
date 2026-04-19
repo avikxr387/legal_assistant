@@ -218,3 +218,9 @@ python ragas_eval.py
 ## Conclusion
 
 This project demonstrates a complete RAG-based system with memory, tool integration, and evaluation mechanisms. It provides a structured approach to building domain-specific assistants capable of handling both static and dynamic knowledge sources.
+
+
+# Author
+
+**AVIK HALDER**
+GitHub: [https://github.com/avikxr387](https://github.com/avikxr387)
