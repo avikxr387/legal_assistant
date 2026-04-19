@@ -1,0 +1,9 @@
+streamlit
+langgraph
+chromadb
+sentence-transformers
+groq
+pypdf
+python-pptx
+ragas
+datasets
