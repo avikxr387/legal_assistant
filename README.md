@@ -1,161 +1,177 @@
-# Legal Document Assistant (RAG + LangGraph)
+# Legal Document Assistant (RAG + LangGraph + FastAPI)
 
 ## Overview
 
-This project implements a legal document assistant capable of answering questions from domain-specific documents using Retrieval-Augmented Generation (RAG). The system integrates structured reasoning via LangGraph, semantic retrieval using ChromaDB, and memory-aware conversations.
+This project implements a Legal Document Assistant capable of answering user queries from both preloaded knowledge and user-uploaded legal documents using a Retrieval-Augmented Generation (RAG) pipeline.
 
-The assistant supports both preloaded knowledge and dynamically uploaded documents, enabling users to query legal content efficiently.
+The system integrates semantic retrieval, structured reasoning, and large language models to provide accurate, context-grounded responses. It supports multi-turn conversations, document ingestion, and source-aware answering, making it suitable for legal document analysis and querying.
 
 ---
 
 ## Key Features
 
-* Document-based question answering using RAG
-* Support for document upload (TXT, PDF, PPTX)
-* Semantic retrieval using vector embeddings
-* Multi-turn conversation with persistent memory
-* Deterministic tool support for precise computations
-* Self-evaluation with retry mechanism for answer quality
-* Source attribution for retrieved answers
-* Streamlit-based chat interface
+* Retrieval-Augmented Generation (RAG) for legal question answering
+* Upload and query custom documents (TXT, PDF, PPTX)
+* Semantic search using vector embeddings
+* Multi-turn conversational memory
+* Deterministic tool support (e.g., counting, date/time)
+* Self-evaluation with faithfulness scoring
+* Source attribution for answers
+* Web-based chat interface (HTML, CSS, JavaScript)
+* Drag-and-drop and button-based file upload
 
 ---
 
 ## System Architecture
 
-The system is built using a graph-based execution model.
+The system uses a graph-based execution model powered by LangGraph.
 
-```
-User Input
-   ↓
-Memory Node
-   ↓
-Router Node
-   ↓
-[Retrieve] / [Tool] / [Skip]
-   ↓
-Answer Node
-   ↓
-Evaluation Node
-   ↓
-Save Node
-```
+User Query
+→ Memory Node
+→ Router Node
+→ (Retrieve / Tool / Skip)
+→ Answer Node
+→ Evaluation Node
+→ Response
 
-### Components
+---
 
-* **StateGraph (LangGraph)**: Controls flow between nodes
-* **ChromaDB**: Stores embeddings for retrieval
-* **SentenceTransformer**: Generates embeddings (`all-MiniLM-L6-v2`)
-* **Groq LLM**: Generates responses
-* **MemorySaver**: Maintains conversation history
-* **Tool Node**: Handles deterministic operations
+## Core Components
+
+### LangGraph
+
+Manages structured flow between nodes such as routing, retrieval, answering, and evaluation.
+
+### ChromaDB
+
+Stores vector embeddings for semantic document retrieval.
+
+### Sentence Transformers
+
+Embedding model used:
+all-MiniLM-L6-v2
+
+### Groq LLM
+
+Handles response generation using contextual inputs.
+
+### Memory System
+
+Maintains conversation state across multiple user queries.
+
+### Tool Layer
+
+Supports deterministic operations such as:
+
+* Character counting
+* Date/time retrieval
 
 ---
 
 ## Project Structure
 
-```
 legal-assistant/
-│
-├── data/
-│   └── documents.py          # Static knowledge base
-│
-├── rag/
-│   ├── embeddings.py         # Embedding model loader
-│   └── vectordb.py           # Vector DB + document ingestion
-│
-├── graph/
-│   ├── state.py              # State schema
-│   ├── nodes.py              # Node implementations
-│   ├── graph_builder.py      # Graph assembly
-│   └── test_nodes.py         # Node testing
-│
-├── capstone_streamlit.py     # Frontend application
-├── test_app.py               # End-to-end testing
-├── ragas_eval.py             # Evaluation pipeline
-│
-└── README.md
-```
+
+data/
+  documents.py
+
+rag/
+  embeddings.py
+  vectordb.py
+
+graph/
+  state.py
+  nodes.py
+  graph_builder.py
+
+backend/
+  api.py
+
+frontend/
+  index.html
+
+ragas_eval.py
+test_app.py
+check_env.py
+README.md
 
 ---
 
 ## Installation
 
-### 1. Clone the repository
+### 1. Clone Repository
 
-```
 git clone https://github.com/your-username/legal-assistant.git
 cd legal-assistant
-```
 
 ---
 
-### 2. Create a virtual environment
+### 2. Create Virtual Environment
 
-```
 python -m venv venv
 venv\Scripts\activate
-```
 
 ---
 
-### 3. Install dependencies
+### 3. Install Dependencies
 
-```
-pip install streamlit langgraph chromadb sentence-transformers groq pypdf python-pptx
-```
+pip install fastapi uvicorn langgraph chromadb sentence-transformers groq pypdf python-pptx duckduckgo-search
 
 ---
 
-## Environment Configuration
+## Environment Setup
 
-Set the Groq API key.
+Set your Groq API key:
 
-### Windows
+Windows:
 
-```
 setx GROQ_API_KEY "your_api_key_here"
-```
 
-Restart the terminal after setting the variable.
+Restart your terminal after setting the variable.
 
 ---
 
 ## Running the Application
 
-```
-streamlit run capstone_streamlit.py
-```
+### Start Backend
+
+uvicorn backend.api:app --reload
+
+Backend runs at:
+http://127.0.0.1:8000
+
+---
+
+### Start Frontend
+
+cd frontend
+python -m http.server 5500
+
+Open in browser:
+http://localhost:5500
 
 ---
 
 ## Document Upload Pipeline
 
-The system supports dynamic ingestion of user documents.
+Upload → Text Extraction → Chunking → Embedding → ChromaDB Storage
 
-### Supported Formats
+Supported formats:
 
 * TXT
 * PDF
 * PPTX
 
-### Processing Flow
-
-```
-Upload → Text Extraction → Chunking → Embedding → ChromaDB Storage
-```
-
-Uploaded content is merged into the existing vector database and becomes immediately queryable.
+Uploaded documents are processed and become immediately available for querying.
 
 ---
 
-## Query Types
+## Supported Query Types
 
-### Domain Queries
+### Legal Knowledge Queries
 
 * What is breach of contract?
 * Explain termination clause
-* What damages can be claimed?
 
 ### Document-Based Queries
 
@@ -165,62 +181,62 @@ Uploaded content is merged into the existing vector database and becomes immedia
 ### Tool-Based Queries
 
 * Count consonants in the document
-* What is the current date and time?
+* What is the current date and time
 
 ---
 
-## Evaluation
+## Evaluation System
 
-The system includes a self-evaluation mechanism:
+The system includes an internal evaluation mechanism:
 
 * Faithfulness scoring (0 to 1)
 * Retry logic for low-confidence answers
-* Source-based grounding enforcement
+* Context-grounded response validation
 
-Evaluation can be performed using:
+Run evaluation:
 
-```
 python ragas_eval.py
-```
 
 ---
 
 ## Design Decisions
 
-* Separation of routing and execution using LangGraph
-* Static + dynamic knowledge integration
-* Deterministic tools for exact computations
-* Sliding window memory to control token usage
-* Context-grounded prompting to reduce hallucination
+* Use of graph-based execution instead of linear pipelines
+* Separation of routing and execution logic
+* Integration of static and dynamic knowledge sources
+* Deterministic tools for precise operations
+* Context-grounded prompting to reduce hallucinations
 
 ---
 
 ## Limitations
 
-* No persistent database (in-memory ChromaDB)
-* No authentication or access control
-* No handling for very large documents
-* Retrieval is purely semantic (no keyword search)
+* No persistent database (in-memory vector storage)
+* No authentication or user management
+* Limited handling of very large documents
+* Retrieval based only on semantic similarity
 
 ---
 
 ## Future Improvements
 
-* Persistent vector database
+* Persistent vector database (ChromaDB with storage)
 * Hybrid retrieval (BM25 + embeddings)
-* Cross-encoder reranking
+* Cross-encoder re-ranking
 * Document summarization pipeline
 * Multi-document reasoning
-* Async processing for large uploads
+* Backend-based chat history persistence
+* Deployment with scalable infrastructure
 
 ---
 
 ## Conclusion
 
-This project demonstrates a complete RAG-based system with memory, tool integration, and evaluation mechanisms. It provides a structured approach to building domain-specific assistants capable of handling both static and dynamic knowledge sources.
+This project demonstrates a complete end-to-end RAG-based legal assistant integrating retrieval, reasoning, memory, and evaluation. It provides a structured and scalable foundation for building domain-specific AI assistants capable of handling both static and user-provided knowledge sources.
 
+---
 
-# Author
+## Author
 
-**AVIK HALDER**
-GitHub: [https://github.com/avikxr387](https://github.com/avikxr387)
+Avik Halder
+GitHub: https://github.com/avikxr387

@@ -112,3 +112,24 @@ dist/
 .coverage
 coverage.xml
 htmlcov/
+
+
+# =========================
+# FastAPI / Uvicorn
+# =========================
+*.pid
+*.reload
+
+# =========================
+# Frontend (local server artifacts)
+# =========================
+*.http
+*.cache
+
+# =========================
+# IDE / Misc
+# =========================
+.idea/
+*.sublime-project
+*.sublime-workspace
+
